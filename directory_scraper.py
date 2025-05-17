@@ -25,20 +25,24 @@ divs = soup.find_all('div', class_='bg')
 for div in divs:
     img_url = div.get('style', '').split('\'')[1]  # split by single quotes surrounding relative image path
     # print(img_url)
-    if img_url:
-        full_url = urljoin('https://www.mcdonogh.org', img_url)
-        filepath = os.path.join('mcd_faces', os.path.basename(full_url))
+    if not img_url:
+        continue
 
-        # skip if the face is already downloaded
-        if img_url.split('/')[-1] in os.listdir('mcd_faces'):
-            print(f'already downloaded {full_url}')
-            continue
+    full_url = urljoin('https://www.mcdonogh.org', img_url)
+    filepath = os.path.join('mcd_faces', os.path.basename(full_url))
 
-        try:
-            data = requests.get(full_url).content
-            with open(filepath, 'wb') as f:
-                f.write(data)
-            print(f'downloaded {full_url}')
-        except Exception as e:
-            print(f'failed to download {full_url}')
+    # skip if the face is already downloaded
+    if img_url.split('/')[-1] in os.listdir('mcd_faces'):
+        print(f'already downloaded {os.path.basename(full_url)}')
+        continue
+
+    # download the image
+    try:
+        data = requests.get(full_url).content
+        with open(filepath, 'wb') as f:  # wb: write in binary mode to preserve image data
+            f.write(data)
+        print(f'downloaded {full_url}')
+    except Exception as e:
+        print(f'failed to download {full_url}')
+
     time.sleep(0.1)  # avoid attacking the servers
