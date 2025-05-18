@@ -7,7 +7,7 @@ from PIL import Image
 from directory_scraper import FACE_DIR
 from facenet_pytorch import MTCNN, InceptionResnetV1
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'running on {device}')
 
 resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)  # pretrained embedding generator
