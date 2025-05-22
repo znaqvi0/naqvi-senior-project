@@ -10,6 +10,7 @@ FACE_DIR = 'mcd_faces'
 if __name__ == '__main__':
     login_url = 'https://www.mcdonogh.org/login'
     directory_urls = [f'https://www.mcdonogh.org/directory?Grade={grade}&DoSearch=1&StudSearch=1' for grade in range(9, 13)]
+    directory_urls.append('https://www.mcdonogh.org/about/contact/faculty-staff-directory?browse')
 
     driver = webdriver.Chrome()
     driver.get(login_url)  # opens login page
@@ -40,8 +41,15 @@ if __name__ == '__main__':
         full_url = urljoin('https://www.mcdonogh.org', img_url)
         filepath = os.path.join(FACE_DIR, os.path.basename(full_url))
 
+        img_name = img_url.split('/')[-1]
+
+        # skip if the image is not a face (not a numeric ID)
+        if not img_name.split('.')[0].isnumeric():
+            print(f'skipping {img_name}')
+            continue
+
         # skip if the face is already downloaded
-        if img_url.split('/')[-1] in os.listdir(FACE_DIR):
+        if img_name in os.listdir(FACE_DIR):
             print(f'already downloaded {os.path.basename(full_url)}')
             continue
 
