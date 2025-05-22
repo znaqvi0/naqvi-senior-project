@@ -17,9 +17,14 @@ mtcnn = MTCNN(image_size=160, margin=0, min_face_size=40).to(device)  # pretrain
 start_time = time.perf_counter()
 
 for img_path in os.listdir(FACE_DIR):
-    img = Image.open(os.path.join(FACE_DIR, img_path))
+    img = Image.open(os.path.join(FACE_DIR, img_path)).convert('RGB')
 
     img_cropped = mtcnn(img)
+
+    if img_cropped is None:
+        print(f'no face detected in {img_path}')
+        continue
+
     embedding = resnet(img_cropped.unsqueeze(0))
 
 end_time = time.perf_counter()
