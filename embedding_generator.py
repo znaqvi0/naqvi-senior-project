@@ -6,33 +6,44 @@ import torch
 from PIL import Image
 
 from directory_scraper import FACE_DIR
-from facenet_pytorch import MTCNN, InceptionResnetV1
+from recognition_utils import resnet, mtcnn
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f'running on {device}')
+def generate_embeddings():
+    embedding_dict = {}
+    # test speed of pretrained models
+    start_time = time.perf_counter()
 
-resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)  # pretrained embedding generator
-mtcnn = MTCNN(image_size=160, margin=0, min_face_size=40).to(device)  # pretrained face detector
+    for img_path in os.listdir(FACE_DIR):
+        img = Image.open(os.path.join(FACE_DIR, img_path)).convert('RGB')
 
-embedding_dict = {}
-# test speed of pretrained models
-start_time = time.perf_counter()
+        img_cropped = mtcnn(img)
 
-for img_path in os.listdir(FACE_DIR):
-    img = Image.open(os.path.join(FACE_DIR, img_path)).convert('RGB')
+        if img_cropped is None:
+            print(f'no face detected in {img_path}')
+            continue
 
-    img_cropped = mtcnn(img)
+        embedding = resnet(img_cropped.unsqueeze(0))
+        embedding_dict[img_path] = embedding.tolist()
 
-    if img_cropped is None:
-        print(f'no face detected in {img_path}')
-        continue
+    end_time = time.perf_counter()
+    print(f'total time: {end_time - start_time}')
+    print(f'average time: {(end_time - start_time) / len(os.listdir(FACE_DIR))}')
 
-    embedding = resnet(img_cropped.unsqueeze(0))
-    embedding_dict[img_path] = embedding.tolist()
+    with open('embeddings.json', 'w') as f:
+        json.dump(embedding_dict, f)
 
-end_time = time.perf_counter()
-print(f'total time: {end_time - start_time}')
-print(f'average time: {(end_time - start_time) / len(os.listdir(FACE_DIR))}')
 
-with open('embeddings.json', 'w') as f:
-    json.dump(embedding_dict, f)
+def load_embedding_dict():
+    # load embeddings from json
+    with open('embeddings.json', 'r') as f:
+        embedding_dict = json.load(f)
+
+    # convert each embedding into a pytorch tensor
+    for person in embedding_dict:
+        embedding_dict[person] = torch.tensor(embedding_dict[person])
+
+    return embedding_dict
+
+
+if __name__ == '__main__':
+    generate_embeddings()
