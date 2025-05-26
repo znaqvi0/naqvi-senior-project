@@ -33,9 +33,9 @@ def generate_embeddings():
         json.dump(embedding_dict, f)
 
 
-def load_embedding_dict():
+def load_embedding_dict(filepath):
     # load embeddings from json
-    with open('embeddings.json', 'r') as f:
+    with open(filepath, 'r') as f:
         embedding_dict = json.load(f)
 
     # convert each embedding into a pytorch tensor

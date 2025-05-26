@@ -6,7 +6,7 @@ from embedding_generator import load_embedding_dict
 from recognition_utils import search_for_match
 from webcam_reader import save_with_timestamp
 
-embedding_dict = load_embedding_dict()
+embedding_dict = load_embedding_dict('embeddings.json')
 cosine_threshold = 0.8
 euclidean_threshold = 0.6
 
