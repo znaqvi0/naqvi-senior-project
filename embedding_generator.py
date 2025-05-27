@@ -5,16 +5,16 @@ import time
 import torch
 from PIL import Image
 
-from directory_scraper import FACE_DIR
+from config import EMBEDDING_JSON_PATH, FACE_DIR_PATH
 from recognition_utils import resnet, mtcnn
 
-def generate_embeddings():
+def generate_embeddings(face_path, output_path):
     embedding_dict = {}
     # test speed of pretrained models
     start_time = time.perf_counter()
 
-    for img_path in os.listdir(FACE_DIR):
-        img = Image.open(os.path.join(FACE_DIR, img_path)).convert('RGB')
+    for img_path in os.listdir(face_path):
+        img = Image.open(os.path.join(face_path, img_path)).convert('RGB')
 
         img_cropped = mtcnn(img)
 
@@ -27,9 +27,9 @@ def generate_embeddings():
 
     end_time = time.perf_counter()
     print(f'total time: {end_time - start_time}')
-    print(f'average time: {(end_time - start_time) / len(os.listdir(FACE_DIR))}')
+    print(f'average time: {(end_time - start_time) / len(os.listdir(face_path))}')
 
-    with open('embeddings.json', 'w') as f:
+    with open(output_path, 'w') as f:
         json.dump(embedding_dict, f)
 
 
@@ -46,4 +46,4 @@ def load_embedding_dict(filepath):
 
 
 if __name__ == '__main__':
-    generate_embeddings()
+    generate_embeddings(FACE_DIR_PATH, EMBEDDING_JSON_PATH)

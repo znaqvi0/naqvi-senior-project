@@ -5,7 +5,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import requests
 
-FACE_DIR = 'mcd_faces'
+from config import FACE_DIR_PATH
 
 if __name__ == '__main__':
     login_url = 'https://www.mcdonogh.org/login'
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     driver.quit()
 
-    os.makedirs(FACE_DIR, exist_ok=True)
+    os.makedirs(FACE_DIR_PATH, exist_ok=True)
     # print(soup.prettify())
     divs = []
     for soup in soups:
@@ -39,7 +39,7 @@ if __name__ == '__main__':
             continue
 
         full_url = urljoin('https://www.mcdonogh.org', img_url)
-        filepath = os.path.join(FACE_DIR, os.path.basename(full_url))
+        filepath = os.path.join(FACE_DIR_PATH, os.path.basename(full_url))
 
         img_name = img_url.split('/')[-1]
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
             continue
 
         # skip if the face is already downloaded
-        if img_name in os.listdir(FACE_DIR):
+        if img_name in os.listdir(FACE_DIR_PATH):
             print(f'already downloaded {os.path.basename(full_url)}')
             continue
 

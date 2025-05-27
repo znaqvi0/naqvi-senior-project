@@ -4,7 +4,7 @@ import os
 import cv2
 from PIL import Image
 
-PHOTO_DIR = 'captures'
+from config import PHOTO_DIR_PATH
 
 def take_photo(save_destination):
     # initialize webcam
@@ -44,10 +44,10 @@ def take_photo(save_destination):
 
 
 def save_with_timestamp():
-    os.makedirs(PHOTO_DIR, exist_ok=True)
+    os.makedirs(PHOTO_DIR_PATH, exist_ok=True)
 
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    save_dest = os.path.join(PHOTO_DIR, f'{timestamp}.jpg')
+    save_dest = os.path.join(PHOTO_DIR_PATH, f'{timestamp}.jpg')
     return take_photo(save_dest), save_dest
 
 
