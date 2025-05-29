@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 
 import cv2
 from PIL import Image
@@ -49,6 +50,22 @@ def save_with_timestamp():
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     save_dest = os.path.join(PHOTO_DIR_PATH, f'{timestamp}.jpg')
     return take_photo(save_dest), save_dest
+
+
+def init_webcam(window_title):
+    camera = cv2.VideoCapture(0)
+    cv2.namedWindow(window_title)
+
+    if not camera.isOpened():
+        print('failed to open camera')
+        sys.exit()
+
+    return camera
+
+
+def close_webcam(camera):
+    camera.release()
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

@@ -1,15 +1,39 @@
+import datetime
 import os
-import random
 
-from config import FACE_DIR_PATH, EMBEDDING_JSON_PATH
+import cv2
+
+from config import EMBEDDING_JSON_PATH, PHOTO_DIR_PATH
 from embedding_generator import load_embedding_dict
 from recognition_utils import search_for_match
-from webcam_reader import save_with_timestamp
+from webcam_reader import init_webcam, close_webcam
 
 embedding_dict = load_embedding_dict(EMBEDDING_JSON_PATH)
 
-# input_image_path = random.choice(os.listdir(FACE_DIR_PATH))  # test path
-# input_image_path = os.path.join(FACE_DIR_PATH, input_image_path)
-_, input_image_path = save_with_timestamp()
+camera = init_webcam('webcam')
 
-search_for_match(input_image_path, embedding_dict, ignore_filenames=True)
+# read frame from webcam
+while True:
+    ret, frame = camera.read()
+    cv2.imshow('webcam', frame)
+
+    if not ret:
+        print('photo capture failed')
+        break
+
+    k = cv2.waitKey(1)
+    if k % 256 == 27:  # esc pressed
+        print("esc pressed, closing...")
+        break
+    elif k % 256 == 32:  # space pressed
+        # save frame
+        os.makedirs(PHOTO_DIR_PATH, exist_ok=True)
+
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        save_dest = os.path.join(PHOTO_DIR_PATH, f'{timestamp}.jpg')
+        cv2.imwrite(save_dest, frame)
+        print(f'photo saved as {save_dest}')
+
+        search_for_match(save_dest, embedding_dict, ignore_filenames=True)
+
+close_webcam(camera)
