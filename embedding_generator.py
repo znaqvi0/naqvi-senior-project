@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import time
 
 import torch
@@ -10,7 +11,7 @@ from recognition import resnet, mtcnn
 
 def generate_embeddings(face_path, output_path):
     embedding_dict = {}
-    # test speed of pretrained models
+
     start_time = time.perf_counter()
 
     for img_path in os.listdir(face_path):
@@ -46,4 +47,7 @@ def load_embedding_dict(filepath):
 
 
 if __name__ == '__main__':
+    if not os.path.exists(FACE_DIR_PATH):
+        print(f'{FACE_DIR_PATH} does not exist. Try running directory_scraper.py or creating your own face directory.')
+        sys.exit()
     generate_embeddings(FACE_DIR_PATH, EMBEDDING_JSON_PATH)
