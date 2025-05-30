@@ -75,13 +75,20 @@ def most_likely_match(cosine_similarities, euclidean_distances):
     return data
 
 
-def compare_image_to_embeddings(image_path, embedding_dict):
+def compare_image_to_embeddings(image_path, embedding_dict, id_name_dict, preprocess_name_function):
     cosine_similarities, euclidean_distances = find_similarities(image_path, embedding_dict, do_print=False,
                                                                  ignore_filenames=True)
     candidate_data = most_likely_match(cosine_similarities, euclidean_distances)
 
     cosine_data = candidate_data['cosine']
     euclidean_data = candidate_data['euclidean']
+
+    # convert image names to person names
+    if id_name_dict is not None:
+        if cosine_data['name']:
+            cosine_data['name'] = id_name_dict[preprocess_name_function(candidate_data['cosine']['name'])]
+        if euclidean_data['name']:
+            euclidean_data['name'] = id_name_dict[preprocess_name_function(candidate_data['euclidean']['name'])]
 
     if cosine_data['name']:
         similarity = cosine_data['value']
