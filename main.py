@@ -5,7 +5,7 @@ import cv2
 
 from config import EMBEDDING_JSON_PATH, PHOTO_DIR_PATH
 from embedding_generator import load_embedding_dict
-from recognition_utils import search_for_match
+from recognition import compare_image_to_embeddings
 from webcam_reader import init_webcam, close_webcam
 
 embedding_dict = load_embedding_dict(EMBEDDING_JSON_PATH)
@@ -34,6 +34,6 @@ while True:
         cv2.imwrite(save_dest, frame)
         print(f'photo saved as {save_dest}')
 
-        search_for_match(save_dest, embedding_dict, ignore_filenames=True)
+        compare_image_to_embeddings(save_dest, embedding_dict)
 
 close_webcam(camera)

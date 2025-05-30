@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 
 from config import EMBEDDING_JSON_PATH, FACE_DIR_PATH
-from recognition_utils import resnet, mtcnn
+from recognition import resnet, mtcnn
 
 def generate_embeddings(face_path, output_path):
     embedding_dict = {}
