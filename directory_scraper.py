@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from urllib.parse import urljoin
@@ -5,7 +6,26 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import requests
 
-from config import FACE_DIR_PATH
+from config import FACE_DIR_PATH, PEOPLE_DATA_JSON_PATH
+
+"""
+A full person div looks like this:
+
+<div class="cell person hover-active">
+					
+    <a href="?Page=Entry&amp;UserID=USER_ID">
+        <div class="bg" style="background-image: url('/images/students/{year}/{USER_ID}.jpg'); background-position: center center"></div>
+    </a>
+    <div class="text">
+        <div class="info">							
+            <a class="name" href="?Page=Entry&amp;UserID=USER_ID">{LASTNAME}, {FIRSTNAME}</a>
+            
+            <!-- {other info e.g. student grade or faculty job title} -->
+
+        </div>
+    </div>
+</div>
+"""
 
 if __name__ == '__main__':
     login_url = 'https://www.mcdonogh.org/login'
@@ -29,12 +49,14 @@ if __name__ == '__main__':
     os.makedirs(FACE_DIR_PATH, exist_ok=True)
     # print(soup.prettify())
     divs = []
+    id_name_dict = {}
+
     for soup in soups:
-        divs.extend(soup.find_all('div', class_='bg'))  # each image looks like div class="bg" in the HTML
+        divs.extend(soup.find_all('div', class_='cell person hover-active'))
 
     for div in divs:
-        # full div: <div class="bg" style="background-image: url('/images/students/{year}/{person ID}.jpg'); background-position: center center"></div>
-        img_url = div.get('style', '').split('\'')[1]  # isolate relative image URL using single quotes
+        image_div = div.find('div', class_='bg')
+        img_url = image_div.get('style', '').split('\'')[1]  # isolate relative image URL using single quotes
         if not img_url:
             continue
 
@@ -44,9 +66,14 @@ if __name__ == '__main__':
         img_name = img_url.split('/')[-1]
 
         # skip if the image is not a face (not a numeric ID)
-        if not img_name.split('.')[0].isnumeric():
+        id_str = img_name.split('.')[0]
+        if not id_str.isnumeric():
             print(f'skipping {img_name}')
             continue
+
+        # get ID + name
+        name_tag = div.find('a', class_='name')
+        id_name_dict[id_str] = name_tag.get_text(strip=True)
 
         # skip if the face is already downloaded
         if img_name in os.listdir(FACE_DIR_PATH):
@@ -63,3 +90,7 @@ if __name__ == '__main__':
             print(f'failed to download {full_url}')
 
         time.sleep(0.1)  # avoid attacking the servers
+
+    # save [ID, name] pairs as json
+    with open(PEOPLE_DATA_JSON_PATH, 'w') as f:
+        json.dump(id_name_dict, f)
