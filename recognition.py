@@ -85,10 +85,13 @@ def compare_image_to_embeddings(image_path, embedding_dict, id_name_dict, prepro
 
     # convert image names to person names
     if id_name_dict is not None:
-        if cosine_data['name']:
-            cosine_data['name'] = id_name_dict[preprocess_name_function(candidate_data['cosine']['name'])]
-        if euclidean_data['name']:
-            euclidean_data['name'] = id_name_dict[preprocess_name_function(candidate_data['euclidean']['name'])]
+        cosine_name = cosine_data['name']
+        euclidean_name = euclidean_data['name']
+        # try to convert names; default to original filename if not found
+        if cosine_name:
+            cosine_data['name'] = id_name_dict.get(preprocess_name_function(cosine_name)) or cosine_name
+        if euclidean_name:
+            euclidean_data['name'] = id_name_dict.get(preprocess_name_function(euclidean_name)) or euclidean_name
 
     if cosine_data['name']:
         similarity = cosine_data['value']
