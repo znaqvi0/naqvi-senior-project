@@ -9,7 +9,7 @@ from facenet_pytorch import InceptionResnetV1, MTCNN
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'running on {device}')
 resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)
-mtcnn = MTCNN(image_size=160, margin=0, min_face_size=40).to(device)
+mtcnn = MTCNN(image_size=160, margin=0, min_face_size=40, device=device)
 
 
 def find_similarities(input_image_path, embedding_dict, ignore_filenames=False, do_print=True):
