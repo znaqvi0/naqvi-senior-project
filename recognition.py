@@ -23,8 +23,8 @@ def find_similarities(input_image_path, embedding_dict, ignore_filenames=False, 
         print('invalid distance metric; defaulting to both...')
         compare_euclidean, compare_cosine = True, True
 
-    cosine_similarities: dict[str, torch.Tensor] = {}
-    euclidean_distances: dict[str, torch.Tensor] = {}
+    cosine_similarities: dict[str, float] = {}
+    euclidean_distances: dict[str, float] = {}
 
     input_image = Image.open(input_image_path).convert('RGB')
     # process image
@@ -41,14 +41,14 @@ def find_similarities(input_image_path, embedding_dict, ignore_filenames=False, 
 
         if compare_cosine:
             # compare the cosine of the angle between the two embeddings
-            similarity = torch.nn.functional.cosine_similarity(input_embedding, embedding_dict[person])
+            similarity = torch.nn.functional.cosine_similarity(input_embedding, embedding_dict[person]).item()
             cosine_similarities[person] = similarity
             if similarity > COSINE_THRESHOLD and do_print:
-                print(f'{input_image_path} has a similarity of {similarity[0]} to {person}')
+                print(f'{input_image_path} has a similarity of {similarity} to {person}')
 
         if compare_euclidean:
             # find the Euclidean distance between the two embeddings
-            euclidean_distance = torch.linalg.vector_norm(embedding_dict[person] - input_embedding)
+            euclidean_distance = (embedding_dict[person] - input_embedding).norm().item()
             euclidean_distances[person] = euclidean_distance
             if euclidean_distance < EUCLIDEAN_THRESHOLD and do_print:
                 print(f'{input_image_path} has a distance of {euclidean_distance} to {person}')
@@ -65,7 +65,7 @@ def most_likely_match(cosine_similarities, euclidean_distances):
     if cosine_similarities:
         max_key = max(cosine_similarities, key=cosine_similarities.get)
         data['cosine']['name'] = max_key
-        data['cosine']['value'] = cosine_similarities[max_key][0]
+        data['cosine']['value'] = cosine_similarities[max_key]
 
     if euclidean_distances:
         min_key = min(euclidean_distances, key=euclidean_distances.get)
